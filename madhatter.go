@@ -50,6 +50,14 @@ func Adapt(constructorFn func() NegroniHandlerFunc) Constructor {
 	}
 }
 
+// AdaptInstance returns a constructor that will always return the same Negroni handler. This
+// should be safe most of the times as Negroni doesn't setup its chains in a static way.
+func AdaptInstance(fn NegroniHandlerFunc) Constructor {
+	return Adapt(func() NegroniHandlerFunc {
+		return fn
+	})
+}
+
 // New creates a new Chain, memorizing the given list of middleware constructors.
 // Constructors will not be called until calling Then() or ThenFunc()
 func New(constructors ...Constructor) Chain {

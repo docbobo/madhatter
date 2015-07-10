@@ -144,14 +144,12 @@ func TestAppendRespectsImmutability(t *testing.T) {
 }
 
 func TestNegroniAdapter(t *testing.T) {
-	n1 := func() NegroniHandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-			w.Write([]byte("t1\n"))
-			next(w, r)
-		}
+	n1 := func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+		w.Write([]byte("t1\n"))
+		next(w, r)
 	}
 
-	chain := New(Adapt(n1))
+	chain := New(AdaptInstance(n1))
 	newChain := chain.Append(tagMiddleware("t2\n"))
 	chained := newChain.ThenFunc(testApp)
 
