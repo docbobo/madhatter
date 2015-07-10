@@ -142,3 +142,26 @@ func TestAppendRespectsImmutability(t *testing.T) {
 
 	assert.NotEqual(t, &chain.constructors[0], &newChain.constructors[0])
 }
+
+func TestNegroniAdapter(t *testing.T) {
+	n1 := func() NegroniHandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+			w.Write([]byte("t1\n"))
+			next(w, r)
+		}
+	}
+
+	chain := New(Adapt(n1))
+	newChain := chain.Append(tagMiddleware("t2\n"))
+	chained := newChain.ThenFunc(testApp)
+
+	w := httptest.NewRecorder()
+	r, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	chained.ServeHTTP(w, r)
+
+	assert.Equal(t, w.Body.String(), "t1\nt2\napp\n")
+}
