@@ -33,17 +33,26 @@ type Chain struct {
 	finalize func(Handler) http.Handler
 }
 
+type NegroniHandler interface {
+	ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc)
+}
+
 // The NegroniHandlerFunc should match the Negroni handler signature
 type NegroniHandlerFunc func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc)
+
+// ServeHTTP calls f(ctx, w, r)
+func (f NegroniHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	f(w, r, next)
+}
 
 // Adapt can be used to adapt existing Negroni handlers so that they can be properly integrated
 // into the middleware chain. They can appear anywhere in the chain and context will be passed
 // properly.
-func Adapt(constructorFn func() NegroniHandlerFunc) Constructor {
+func Adapt(constructorHandler func() NegroniHandler) Constructor {
 	return func(next Handler) Handler {
-		fn := constructorFn()
+		h := constructorHandler()
 		return HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-			fn(w, r, func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r, func(w http.ResponseWriter, r *http.Request) {
 				next.ServeHTTP(ctx, w, r)
 			})
 		})
@@ -52,8 +61,8 @@ func Adapt(constructorFn func() NegroniHandlerFunc) Constructor {
 
 // AdaptInstance returns a constructor that will always return the same Negroni handler. This
 // should be safe most of the times as Negroni doesn't setup its chains in a static way.
-func AdaptInstance(fn NegroniHandlerFunc) Constructor {
-	return Adapt(func() NegroniHandlerFunc {
+func AdaptInstance(fn NegroniHandler) Constructor {
+	return Adapt(func() NegroniHandler {
 		return fn
 	})
 }

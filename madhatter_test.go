@@ -149,7 +149,7 @@ func TestNegroniAdapter(t *testing.T) {
 		next(w, r)
 	}
 
-	chain := New(AdaptInstance(n1))
+	chain := New(AdaptInstance(NegroniHandlerFunc(n1)))
 	newChain := chain.Append(tagMiddleware("t2\n"))
 	chained := newChain.ThenFunc(testApp)
 
