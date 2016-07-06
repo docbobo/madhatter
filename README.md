@@ -2,6 +2,7 @@ Mad Hatter
 ==========
 
 [![Build Status](https://travis-ci.org/docbobo/madhatter.svg?branch=master)](https://travis-ci.org/docbobo/madhatter)
+[![Go Report Card](https://goreportcard.com/badge/github.com/docbobo/madhatter)](https://goreportcard.com/report/github.com/docbobo/madhatter)
 
 Mad Hatter provides a convenient way to chain HTTP middleware functions, similar to [Alice](https://github.com/justinas/alice).
 It just differs by the fact that it does not expect middleware to fulfill the http.Handler interface - instead it comes with
