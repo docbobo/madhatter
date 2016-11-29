@@ -3,7 +3,7 @@ package madhatter
 import (
 	"net/http"
 
-	"golang.org/x/net/context"
+	"context"
 )
 
 // Handler provides an interface similar to http.Handler but supporting
